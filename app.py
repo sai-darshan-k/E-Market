@@ -122,7 +122,9 @@ def register():
         flash('Registration successful. Please login.')
         return redirect(url_for('login'))
     
-    return render_template('register.html')
+    # Get the 'type' query parameter from the URL
+    user_type = request.args.get('type', 'consumer')  # Default to 'consumer' if no type is provided
+    return render_template('register.html', user_type=user_type)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

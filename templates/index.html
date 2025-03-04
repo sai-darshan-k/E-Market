@@ -16,8 +16,11 @@
                     <button class="menu-toggle" id="menuToggle">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <a href="index.html" class="logo">
-                        <img src="/api/placeholder/200/80" alt="Kissan E-Market Logo">
+                    <a href="{{ url_for('home') }}" class="logo">
+                        <div class="logo-container">
+                            <span class="logo-text">KISSAN 4.0</span>
+                            <span class="logo-subtitle">E-Market</span>
+                        </div>
                     </a>
                 </div>
                 <div class="search-container">
@@ -65,7 +68,7 @@
                 <h2>Direct from Farm to Home</h2>
                 <a href="products.html" class="btn primary-btn">Explore Now</a>
             </div>
-            <img src="static/farm7.avif" alt="Fresh farm products">
+            <img src="static/images/farm7.avif" alt="Fresh farm products">
         </div>
         <div class="slide">
             <div class="slide-content">
@@ -73,15 +76,15 @@
                 <h2>Support Local Farmers</h2>
                 <a href="products.html?category=organic" class="btn primary-btn">Buy Organic</a>
             </div>
-            <img src="static/organic2.png" alt="Organic farming">
+            <img src="static/images/organic2.png" alt="Organic farming">
         </div>
         <div class="slide">
             <div class="slide-content">
                 <h1>Farmer Registration</h1>
                 <h2>Sell Your Products Directly</h2>
-                <a href="register.html?type=farmer" class="btn primary-btn">Register Now</a>
+                <a href="{{ url_for('register') }}?type=farmer" class="btn primary-btn">Register as Farmer</a>
             </div>
-            <img src="static/sell.avif" alt="Farmer with produce">
+            <img src="static/images/sell.avif" alt="Farmer with produce">
         </div>
         <button class="slide-arrow prev-arrow"><i class="fas fa-chevron-left"></i></button>
         <button class="slide-arrow next-arrow"><i class="fas fa-chevron-right"></i></button>
@@ -151,12 +154,12 @@
                     <div class="cta-card">
                         <h3>Are you a Farmer?</h3>
                         <p>Register and sell your products directly to consumers.</p>
-                        <a href="register.html?type=farmer" class="btn primary-btn">Register as Farmer</a>
+                        <a href="{{ url_for('register') }}?type=farmer" class="btn primary-btn">Register as Farmer</a>
                     </div>
                     <div class="cta-card">
                         <h3>Looking for Fresh Produce?</h3>
                         <p>Register as a consumer and start shopping.</p>
-                        <a href="register.html?type=consumer" class="btn primary-btn">Register as Consumer</a>
+                        <a href="{{ url_for('register') }}?type=consumer" class="btn primary-btn">Register as Consumer</a>
                     </div>
                 </div>
             </div>

@@ -40,7 +40,62 @@ body {
     margin: 0 auto;
     padding: 0 20px;
 }
+.logo {
+    text-decoration: none; /* Remove underline from link */
+    display: flex;
+    align-items: center;
+}
 
+.logo-container {
+    display: flex;
+    flex-direction: column; /* Stack KISSAN 4.0 and E-Market vertically */
+    align-items: center; /* Center-align text */
+    padding: 5px 10px; /* Padding for the "box" effect */
+    border: 2px solid #689f38; /* Light green border */
+    border-radius: 5px; /* Rounded corners */
+    background-color: rgba(255, 255, 255, 0.1); /* Slight background for contrast */
+}
+
+.logo-text {
+    font-family: 'Arial', sans-serif; /* Or a custom font */
+    font-size: 28px; /* Larger size for KISSAN 4.0 */
+    font-weight: bold;
+    color: #2e7d32; /* Dark green */
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(90deg, #2e7d32, #689f38);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1; /* Tighten line spacing */
+}
+
+.logo-subtitle {
+    font-family: 'Arial', sans-serif;
+    font-size: 14px; /* Smaller size for E-Market */
+    font-weight: normal;
+    color: #388e3c; /* Slightly lighter green */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+    margin-top: 2px; /* Small gap between KISSAN 4.0 and E-Market */
+}
+
+/* Hover effect */
+.logo-container:hover {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .logo-text {
+        font-size: 20px;
+    }
+    .logo-subtitle {
+        font-size: 12px;
+    }
+}
 a {
     text-decoration: none;
     color: var(--primary-color);
@@ -529,7 +584,167 @@ header {
     margin: 0 auto;
     width: fit-content;
 }
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columns */
+    gap: 30px; /* Consistent spacing between cards */
+    margin-bottom: 40px;
+    padding: 0 20px;
+}
 
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns for tablets */
+    }
+}
+
+@media (max-width: 480px) {
+    .products-grid {
+        grid-template-columns: 1fr; /* 1 column for mobile */
+    }
+}
+
+.product-card {
+    background-color: white;
+    border-radius: 8px; /* Replace var(--border-radius) */
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Replace var(--box-shadow) */
+    transition: transform 0.3s ease; /* Replace var(--transition) */
+    position: relative;
+    display: flex;
+    flex-direction: column; /* Stacks content vertically */
+    height: 420px; /* Adjusted height to fit 200px image + details */
+    width: 100%; /* Ensures it takes full grid cell width */
+    max-width: 250px; /* Optional: caps card width for consistency */
+    margin: 0 auto; /* Centers cards in grid cells */
+}
+
+.product-image {
+    position: relative;
+    height: 200px; /* Fixed height */
+    width: 200px; /* Fixed width for square images */
+    overflow: hidden;
+    background-color: #f5f5f5; /* Fallback color if image fails */
+    margin: 0 auto; /* Centers the image container within the card */
+}
+
+.product-image img {
+    width: 100%; /* Fills the 200px width */
+    height: 100%; /* Fills the 200px height */
+    object-fit: cover; /* Crops image to fit without distortion */
+    object-position: center; /* Centers the image */
+    transition: transform 0.5s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Replace var(--box-shadow-hover) */
+}
+
+.product-card:hover .product-image img {
+    transform: scale(1.05); /* Zoom effect on hover */
+}
+
+.product-tag {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 5px 10px;
+    background-color: #28a745; /* Replace var(--primary-color) */
+    color: white;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    z-index: 5;
+}
+
+.product-details {
+    padding: 15px; /* Reduced padding to fit within 420px height */
+    flex-grow: 1; /* Takes remaining space */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Distributes content evenly */
+    height: calc(100% - 200px); /* Remaining height after image */
+    width: 100%; /* Matches card width */
+}
+
+.product-title {
+    font-size: 1.1rem; /* Slightly smaller to fit */
+    margin-bottom: 8px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Truncates long titles */
+}
+
+.product-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.product-price {
+    font-weight: 700;
+    color: #28a745; /* Replace var(--primary-color) */
+    font-size: 1.1rem;
+}
+
+.product-unit {
+    color: #666; /* Replace var(--text-light) */
+    font-size: 0.85rem;
+}
+
+.farmer-name {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.85rem;
+    color: #666; /* Replace var(--text-light) */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Truncates long farmer names */
+}
+
+.farmer-name i {
+    color: #f39c12; /* Replace var(--secondary-color) */
+}
+
+.product-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: auto; /* Pushes actions to the bottom */
+}
+
+.product-actions .btn {
+    flex: 1;
+    padding: 6px 10px; /* Smaller padding */
+    font-size: 0.85rem;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.product-actions .btn:hover {
+    background-color: #218838;
+}
+
+.product-actions .wishlist-btn {
+    width: 35px; /* Slightly smaller */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border: 1px solid #ddd; /* Replace var(--border-color) */
+    color: #666; /* Replace var(--text-light) */
+    border-radius: 4px;
+}
+
+.product-actions .wishlist-btn:hover {
+    color: #dc3545; /* Replace var(--error-color) */
+    border-color: #dc3545;
+}
 /* =============== BENEFITS SECTION =============== */
 .benefits {
     padding: 60px 0;
