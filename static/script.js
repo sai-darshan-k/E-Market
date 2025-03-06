@@ -1,10 +1,7 @@
-// script.js
-
-// Menu Toggle for Mobile
 document.addEventListener('DOMContentLoaded', () => {
+    // Menu Toggle for Mobile
     const menuToggle = document.getElementById('menuToggle');
     const mainNav = document.querySelector('.main-nav');
-
     if (menuToggle && mainNav) {
         menuToggle.addEventListener('click', () => {
             mainNav.classList.toggle('active');
@@ -53,20 +50,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 5000);
     }
 
-// Registration Form Tabs (register.html)
-const optionTabs = document.querySelectorAll('.option-tab');
-const registerForms = document.querySelectorAll('.register-forms form');
-if (optionTabs.length && registerForms.length) {
-    optionTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            optionTabs.forEach(t => t.classList.remove('active'));
-            registerForms.forEach(f => f.classList.remove('active'));
-            tab.classList.add('active');
-            document.getElementById(`${tab.dataset.type}-form`).classList.add('active');
+    // Registration Form Tabs (register.html)
+    const optionTabs = document.querySelectorAll('.option-tab');
+    const registerForms = document.querySelectorAll('.register-forms form');
+    if (optionTabs.length && registerForms.length) {
+        optionTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                optionTabs.forEach(t => t.classList.remove('active'));
+                registerForms.forEach(f => f.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.type}-form`).classList.add('active');
+            });
         });
-    });
-}
-
+    }
     // Product Data with Categories and 20% Savings
     const products = [
         // Vegetables
@@ -161,7 +157,88 @@ if (optionTabs.length && registerForms.length) {
             currentCategory.textContent = title;
         }
     }
+    document.addEventListener('DOMContentLoaded', () => {
+        // Login Popup Handling
+        const loginBtn = document.getElementById('loginBtn');
+        const loginPopup = document.getElementById('loginPopup');
+        const closePopup = document.getElementById('closePopup');
+        const isLoggedIn = document.body.dataset.loggedIn === 'true';
+    
+        // Function to show login popup
+        function showLoginPopup(e) {
+            e.preventDefault();
+            if (loginPopup) {
+                loginPopup.style.display = 'flex';
+            }
+        }
+    
+        // Function to hide login popup
+        function hideLoginPopup() {
+            if (loginPopup) {
+                loginPopup.style.display = 'none';
+            }
+        }
+    
+        // Event Listeners
+        if (loginBtn) {
+            loginBtn.addEventListener('click', showLoginPopup);
+        }
+    
+        if (closePopup) {
+            closePopup.addEventListener('click', hideLoginPopup);
+        }
+    
+        // Close popup when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === loginPopup) {
+                hideLoginPopup();
+            }
+        });
+    
+        // Handle manual login form submission
+        const manualLoginForm = document.getElementById('manualLoginForm');
+        if (manualLoginForm) {
+            manualLoginForm.addEventListener('submit', (e) => {
+                // Default form submission will be handled by Flask
+                // You can add client-side validation here if needed
+            });
+        }
+    });
 
+// Handle Add to Cart Buttons
+const addToCartButtons = document.querySelectorAll('.add-to-cart');
+const cartCountElement = document.querySelector('.cart .badge.count');
+let cartCount = parseInt(cartCountElement ? cartCountElement.textContent : '0');
+
+addToCartButtons.forEach(button => {
+    button.addEventListener('click', (e) => {
+        e.preventDefault();
+        const productId = button.getAttribute('data-product-id');
+
+        if (!isLoggedIn) {
+            loginPopup.style.display = 'flex';
+        } else {
+            fetch(`/add_to_cart/${productId}`, { method: 'GET' })
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to add to cart');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.message) {
+                        cartCount += 1;
+                        if (cartCountElement) cartCountElement.textContent = cartCount;
+                        alert('Item added to cart!');
+                    } else {
+                        alert(data.error || 'Error adding to cart');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to add item to cart');
+                });
+        }
+    });
+});
     // Dynamic Farmer Loading Placeholder (index.html)
     const farmerGrid = document.querySelector('.farmer-grid');
     if (farmerGrid) {
@@ -183,42 +260,42 @@ if (optionTabs.length && registerForms.length) {
         });
     }
 
-    // Price Range Slider (products.html)
-    const priceRange = document.getElementById('priceRange');
-    const priceValue = document.getElementById('priceValue');
-    if (priceRange && priceValue) {
-        priceRange.addEventListener('input', () => {
-            priceValue.textContent = `₹${priceRange.value}+`;
-        });
-    }
+ // Price Range Slider (products.html)
+ const priceRange = document.getElementById('priceRange');
+ const priceValue = document.getElementById('priceValue');
+ if (priceRange && priceValue) {
+     priceRange.addEventListener('input', () => {
+         priceValue.textContent = `₹${priceRange.value}+`;
+     });
+ }
 
-    // Filter Application Placeholder (products.html)
-    const applyFiltersBtn = document.getElementById('apply-filters');
-    const clearFiltersBtn = document.getElementById('clear-filters');
-    if (applyFiltersBtn && clearFiltersBtn) {
-        applyFiltersBtn.addEventListener('click', () => {
-            console.log('Filters applied'); // Replace with actual filter logic
-        });
+ // Filter Application Placeholder (products.html)
+ const applyFiltersBtn = document.getElementById('apply-filters');
+ const clearFiltersBtn = document.getElementById('clear-filters');
+ if (applyFiltersBtn && clearFiltersBtn) {
+     applyFiltersBtn.addEventListener('click', () => {
+         console.log('Filters applied'); // Add filter logic here
+     });
 
-        clearFiltersBtn.addEventListener('click', () => {
-            document.querySelectorAll('.checkbox-group input').forEach(input => input.checked = false);
-            document.getElementById('location-filter').value = '';
-            document.getElementById('sort-products').value = 'relevance';
-            priceRange.value = 5000;
-            priceValue.textContent = '₹5000+';
-            console.log('Filters cleared'); // Replace with actual reset logic
-        });
-    }
+     clearFiltersBtn.addEventListener('click', () => {
+         document.querySelectorAll('.checkbox-group input').forEach(input => input.checked = false);
+         document.getElementById('location-filter').value = '';
+         document.getElementById('sort-products').value = 'relevance';
+         priceRange.value = 5000;
+         priceValue.textContent = '₹5000+';
+         console.log('Filters cleared'); // Add reset logic here
+     });
+ }
 
-    // Pagination Placeholder (products.html)
-    const paginationBtns = document.querySelectorAll('.pagination-btn');
-    paginationBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            paginationBtns.forEach(b => b.classList.remove('active'));
-            if (!btn.querySelector('i')) { // Ignore arrow buttons
-                btn.classList.add('active');
-                console.log(`Page ${btn.textContent} selected`); // Replace with actual page logic
-            }
-        });
-    });
+ // Pagination Placeholder (products.html)
+ const paginationBtns = document.querySelectorAll('.pagination-btn');
+ paginationBtns.forEach(btn => {
+     btn.addEventListener('click', () => {
+         paginationBtns.forEach(b => b.classList.remove('active'));
+         if (!btn.querySelector('i')) { // Ignore arrow buttons
+             btn.classList.add('active');
+             console.log(`Page ${btn.textContent} selected`); // Add page logic here
+         }
+     });
+ });
 });

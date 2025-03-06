@@ -58,6 +58,33 @@
         </div>
     </header>
 
+    <div id="loginPopup" class="popup">
+        <div class="popup-content">
+            <span class="close-btn" id="closePopup">&times;</span>
+            <h2>Login to Kissan E-Market</h2>
+            <div class="login-options">
+                <!-- Google Login Button -->
+                <button class="google-login-btn" id="googleLoginBtn">
+                    <i class="fab fa-google"></i> Login with Google
+                </button>
+                <p>OR</p>
+                <!-- Manual Login Form -->
+                <form id="manualLoginForm" method="POST" action="{{ url_for('login') }}">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="primary-btn">Login</button>
+                </form>
+                <p>Not registered? <a href="{{ url_for('register') }}">Register here</a></p>
+            </div>
+        </div>
+    </div>
+
     <main>
        <!-- Hero Slider -->
 <section class="hero-slider">
@@ -74,7 +101,7 @@
             <div class="slide-content">
                 <h1>100% Organic Products</h1>
                 <h2>Support Local Farmers</h2>
-                <a href="products.html?category=organic" class="btn primary-btn">Buy Organic</a>
+                <a href="{{ url_for('register') }}?type=consumer" class="btn primary-btn">Buy Organic</a>
             </div>
             <img src="static/images/organic2.png" alt="Organic farming">
         </div>

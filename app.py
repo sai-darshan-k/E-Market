@@ -1,14 +1,8 @@
-# Project structure for Kissan E-Market
-# app.py - Main Flask application
-# /static - CSS, JS, and image files
-# /templates - HTML templates
-# /models - Database models
-
-# app.py
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from authlib.integrations.flask_client import OAuth
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'kissan_e_market_secret_key'
@@ -77,6 +71,18 @@ class OrderItem(db.Model):
     def __repr__(self):
         return f'<OrderItem {self.id}>'
 
+# OAuth Setup for Google Login
+oauth = OAuth(app)
+google = oauth.register(
+    name='google',
+    client_id='YOUR_GOOGLE_CLIENT_ID',  # Replace with your Google Client ID
+    client_secret='YOUR_GOOGLE_CLIENT_SECRET',  # Replace with your Google Client Secret
+    authorize_url='https://accounts.google.com/o/oauth2/auth',
+    token_url='https://accounts.google.com/o/oauth2/token',
+    userinfo_endpoint='https://www.googleapis.com/oauth2/v1/userinfo',
+    client_kwargs={'scope': 'openid email profile'},
+)
+
 # Routes
 @app.route('/')
 def home():
@@ -95,13 +101,11 @@ def register():
         email = request.form.get('email')
         password = request.form.get('password')
         
-        # Check if user already exists
         user_exists = User.query.filter_by(email=email).first()
         if user_exists:
             flash('Email already registered')
             return redirect(url_for('register'))
         
-        # Create new user
         hashed_password = generate_password_hash(password)
         new_user = User(
             username=username,
@@ -110,7 +114,6 @@ def register():
             user_type=user_type
         )
         
-        # If farmer, add additional details
         if user_type == 'farmer':
             new_user.farm_name = request.form.get('farm_name')
             new_user.location = request.form.get('location')
@@ -120,30 +123,53 @@ def register():
         db.session.commit()
         
         flash('Registration successful. Please login.')
-        return redirect(url_for('login'))
+        return redirect(url_for('home'))
     
-    # Get the 'type' query parameter from the URL
-    user_type = request.args.get('type', 'consumer')  # Default to 'consumer' if no type is provided
+    user_type = request.args.get('type', 'consumer')
     return render_template('register.html', user_type=user_type)
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['POST'])
 def login():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        
-        user = User.query.filter_by(email=email).first()
-        
-        if user and check_password_hash(user.password, password):
-            session['user_id'] = user.id
-            session['user_type'] = user.user_type
-            
-            flash('Login successful')
-            return redirect(url_for('home'))
-        else:
-            flash('Invalid email or password')
+    email = request.form.get('email')
+    password = request.form.get('password')
     
-    return render_template('login.html')
+    user = User.query.filter_by(email=email).first()
+    
+    if user and check_password_hash(user.password, password):
+        session['user_id'] = user.id
+        session['user_type'] = user.user_type
+        flash('Login successful')
+        return redirect(url_for('home'))
+    else:
+        flash('Invalid email or password')
+        return redirect(url_for('home'))
+
+@app.route('/login/google')
+def login_google():
+    redirect_uri = url_for('authorize_google', _external=True)
+    return google.authorize_redirect(redirect_uri)
+
+@app.route('/authorize/google')
+def authorize_google():
+    token = google.authorize_access_token()
+    user_info = google.parse_id_token(token)
+    
+    # Check if user exists, if not create a new one
+    user = User.query.filter_by(email=user_info['email']).first()
+    if not user:
+        user = User(
+            username=user_info['name'],
+            email=user_info['email'],
+            password=generate_password_hash(user_info['sub']),  # Use Google ID as password
+            user_type='consumer'  # Default to consumer for Google login
+        )
+        db.session.add(user)
+        db.session.commit()
+    
+    session['user_id'] = user.id
+    session['user_type'] = user.user_type
+    flash('Login successful')
+    return redirect(url_for('home'))
 
 @app.route('/logout')
 def logout():
@@ -156,7 +182,7 @@ def logout():
 def farmer_dashboard():
     if 'user_id' not in session or session['user_type'] != 'farmer':
         flash('Please login as a farmer to access this page')
-        return redirect(url_for('login'))
+        return redirect(url_for('home'))
     
     farmer_id = session['user_id']
     products = Product.query.filter_by(farmer_id=farmer_id).all()
@@ -166,7 +192,7 @@ def farmer_dashboard():
 def add_product():
     if 'user_id' not in session or session['user_type'] != 'farmer':
         flash('Please login as a farmer to access this page')
-        return redirect(url_for('login'))
+        return redirect(url_for('home'))
     
     if request.method == 'POST':
         name = request.form.get('name')
@@ -210,11 +236,10 @@ def product_detail(product_id):
     farmer = User.query.get(product.farmer_id)
     return render_template('product_detail.html', product=product, farmer=farmer)
 
-@app.route('/add_to_cart/<int:product_id>')
+@app.route('/add_to_cart/<int:product_id>', methods=['GET'])
 def add_to_cart(product_id):
     if 'user_id' not in session:
-        flash('Please login to add items to cart')
-        return redirect(url_for('login'))
+        return jsonify({'error': 'Please login to add items to cart'}), 401
     
     cart_item = Cart.query.filter_by(user_id=session['user_id'], product_id=product_id).first()
     
@@ -229,14 +254,13 @@ def add_to_cart(product_id):
         db.session.add(new_cart_item)
     
     db.session.commit()
-    flash('Item added to cart')
-    return redirect(url_for('cart'))
+    return jsonify({'message': 'Item added to cart'})
 
 @app.route('/cart')
 def cart():
     if 'user_id' not in session:
         flash('Please login to view your cart')
-        return redirect(url_for('login'))
+        return redirect(url_for('home'))
     
     cart_items = Cart.query.filter_by(user_id=session['user_id']).all()
     total = 0
@@ -257,7 +281,7 @@ def cart():
 def checkout():
     if 'user_id' not in session:
         flash('Please login to checkout')
-        return redirect(url_for('login'))
+        return redirect(url_for('home'))
     
     if request.method == 'POST':
         cart_items = Cart.query.filter_by(user_id=session['user_id']).all()
@@ -288,11 +312,7 @@ def checkout():
                 price=product.price
             )
             db.session.add(order_item)
-            
-            # Update product quantity
             product.quantity -= item.quantity
-            
-            # Delete cart item
             db.session.delete(item)
         
         db.session.commit()
@@ -305,7 +325,7 @@ def checkout():
 def orders():
     if 'user_id' not in session:
         flash('Please login to view your orders')
-        return redirect(url_for('login'))
+        return redirect(url_for('home'))
     
     orders = Order.query.filter_by(user_id=session['user_id']).order_by(Order.created_at.desc()).all()
     return render_template('orders.html', orders=orders)
@@ -314,7 +334,7 @@ def orders():
 def order_detail(order_id):
     if 'user_id' not in session:
         flash('Please login to view order details')
-        return redirect(url_for('login'))
+        return redirect(url_for('home'))
     
     order = Order.query.get_or_404(order_id)
     
@@ -334,6 +354,13 @@ def order_detail(order_id):
         })
     
     return render_template('order_detail.html', order=order, items=items)
+
+@app.route('/cart_count')
+def cart_count():
+    if 'user_id' in session:
+        count = Cart.query.filter_by(user_id=session['user_id']).count()
+        return jsonify({'count': count})
+    return jsonify({'count': 0})
 
 if __name__ == '__main__':
     with app.app_context():
